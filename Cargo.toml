@@ -1,0 +1,21 @@
+[package]
+name = "epitech-checker"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+reqwest = { version = "*", features = ["blocking", "json"] }
+serde = { version = "*", features = ["derive"] }
+serde_json = "*"
+clap = {version = "*", features = ["derive"]}
+thiserror = "*"
+chrono = "*"
+
+[dev-dependencies]
+anyhow = "*"
+
+[profile.release]
+opt-level = "z"      
+lto = true           
+codegen-units = 1  
+panic = 'abort'    
