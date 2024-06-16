@@ -15,7 +15,7 @@ This project automatically fixes code style errors for Epitech projects. It gene
 1. Clone the repository:
 
 ```sh
-git clone https://github.com/yourusername/epitech-coding-style-fixer.git
+git clone https://github.com/suleymanlaarabi/epitech-coding-style-fixer
 cd epitech-coding-style-fixer
 ```
 
