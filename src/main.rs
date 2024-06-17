@@ -1,6 +1,6 @@
 use clap::Parser;
 use coding_style_fixer::fix_coding_style_issues;
-use project_operation::Project;
+use project_operation::{init_new_project, Project};
 mod all_coding_style_fixe;
 mod coding_checker;
 mod coding_style_fixer;
@@ -37,23 +37,27 @@ struct Args {
 }
 
 fn main() -> Result<()> {
-    let args = Args::parse();
-
-    let delivery_dir = PathBuf::from(&args.delivery_dir).canonicalize()?;
-    let reports_dir = PathBuf::from(&args.reports_dir).canonicalize()?;
-    let is_init = args.init;
-
-    if !delivery_dir.exists() || !reports_dir.exists() {
-        eprintln!("Error: One or both directories do not exist.");
-        return Ok(());
-    }
-
     let current_dir = std::env::current_dir()?;
+
+    let args = Args::parse();
+    let is_init = args.init;
 
     let project: Option<Project> = match is_init {
         true => {
-            let project = Project::from_dir(&current_dir)?;
-            project.save(&current_dir)?;
+            let project = match init_new_project(&current_dir) {
+                Ok(project) => project,
+                Err(error) => {
+                    match error {
+                        Error::Io(_) => {
+                            println!("Project already exists.");
+                        }
+                        _ => {
+                            eprintln!("Error: An unexpected error occurred.");
+                        }
+                    }
+                    return Ok(());
+                }
+            };
             Some(project)
         }
         false => match project_operation::project_parse(&current_dir) {
@@ -75,6 +79,22 @@ fn main() -> Result<()> {
             }
         },
     };
+
+    let delivery_dir = match &project {
+        Some(project) => project.delivery_dir.clone(),
+        None => PathBuf::from(&args.delivery_dir),
+    };
+
+    let reports_dir = match &project {
+        Some(project) => project.reports_dir.clone(),
+        None => PathBuf::from(&args.reports_dir),
+    };
+
+    if !delivery_dir.exists() || !reports_dir.exists() {
+        eprintln!("Error: One or both directories do not exist.");
+        return Ok(());
+    }
+
     println!("start");
 
     let file_path = coding_checker(&delivery_dir, &reports_dir, false)?;

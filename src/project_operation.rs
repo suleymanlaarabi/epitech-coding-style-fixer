@@ -8,6 +8,8 @@ use crate::{Error, Result};
 pub struct Project {
     pub name: String,
     pub description: String,
+    pub delivery_dir: PathBuf,
+    pub reports_dir: PathBuf,
 }
 
 impl Project {
@@ -15,6 +17,8 @@ impl Project {
         Self {
             name: "Nom du projet".to_string(),
             description: "Description du projet".to_string(),
+            delivery_dir: PathBuf::from("delivery"),
+            reports_dir: PathBuf::from("reports"),
         }
     }
     pub fn from_dir(project_dir: &PathBuf) -> Result<Self> {
@@ -28,6 +32,8 @@ impl Project {
         Ok(Self {
             name: project_name,
             description: project_description,
+            delivery_dir: project_dir.join("delivery"),
+            reports_dir: project_dir.join("reports"),
         })
     }
     pub fn save(&self, project_dir: &PathBuf) -> Result<()> {
@@ -50,4 +56,20 @@ pub fn project_parse(project_dit: &PathBuf) -> Result<Project> {
         Ok(project) => Ok(project),
         Err(_) => return Err(Error::InvalidData),
     }
+}
+
+const CLANG_FORMAT_FILE: &[u8] = include_bytes!("../resources/.clang-format");
+
+pub fn init_new_project(project_dir: &PathBuf) -> Result<Project> {
+    let project = Project::from_dir(project_dir)?;
+    let delivery_dir = project_dir.join("delivery");
+    let reports_dir = project_dir.join("reports");
+    std::fs::create_dir_all(&delivery_dir)?;
+    std::fs::create_dir_all(&reports_dir)?;
+
+    let clang_format_file_path = delivery_dir.join(".clang-format");
+    std::fs::write(clang_format_file_path, CLANG_FORMAT_FILE)?;
+
+    project.save(project_dir)?;
+    Ok(project)
 }

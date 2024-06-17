@@ -1,4 +1,6 @@
 {
   "name": "epitech-checker",
-  "description": "Description du projet"
+  "description": "Description du projet",
+  "delivery_dir": "/home/suleyman/Desktop/project/rust/epitech-checker/delivery",
+  "reports_dir": "/home/suleyman/Desktop/project/rust/epitech-checker/reports"
 }
