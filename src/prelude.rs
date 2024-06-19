@@ -4,7 +4,7 @@ use std::{fs, path::PathBuf};
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-type FixMethod = fn(&Rule, &mut String, &Project) -> String;
+type FixMethod = fn(&CodingStyleAlert, &mut String, &Project) -> String;
 
 #[derive(Clone, Debug)]
 pub struct Rule {
@@ -53,8 +53,7 @@ impl CodingStyleAlert {
 
     pub fn fix_issue(&self, dir: &PathBuf, project: &Project) {
         if let Ok(mut file_content) = fs::read_to_string(dir.join(&self.file)) {
-            println!("file_content: {:?}", file_content);
-            let new_content = (self.rule.fix_method)(&self.rule, &mut file_content, project);
+            let new_content = (self.rule.fix_method)(&self, &mut file_content, project);
             fs::write(dir.join(&self.file), new_content).unwrap();
         }
     }

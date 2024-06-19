@@ -43,6 +43,7 @@ pub fn run_coding_style_checker(
         ])
         .status()?;
 
+
     Ok(())
 }
 

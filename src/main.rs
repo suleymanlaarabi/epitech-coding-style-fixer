@@ -1,14 +1,13 @@
 use clap::Parser;
 use coding_style_fixer::fix_coding_style_issues;
-use project_operation::{init_new_project, Project};
-mod all_coding_style_fixe;
+use project_operation::{init_new_project, print_project, Project};
 mod coding_checker;
 mod coding_style_fixer;
 mod docker_operation;
 mod error;
+mod fixer;
 mod prelude;
 mod project_operation;
-mod utility_functions;
 
 use crate::prelude::*;
 use coding_checker::coding_checker;
@@ -34,6 +33,13 @@ struct Args {
         help = "initialise un nouveau projet"
     )]
     init: bool,
+    #[arg(
+        short,
+        long,
+        default_value = "false",
+        help = "Affiche les informations du projet"
+    )]
+    show_project: bool,
 }
 
 fn main() -> Result<()> {
@@ -41,6 +47,25 @@ fn main() -> Result<()> {
 
     let args = Args::parse();
     let is_init = args.init;
+    let is_show_project = args.show_project;
+
+    if is_show_project {
+        match project_operation::project_parse(&current_dir) {
+            Ok(project) => print_project(&project),
+            Err(error) => match error {
+                Error::NotFound => {
+                    println!("Project file not found.");
+                }
+                Error::InvalidData => {
+                    println!("Invalid project json.");
+                }
+                _ => {
+                    eprintln!("Error: An unexpected error occurred.");
+                }
+            },
+        }
+        return Ok(());
+    }
 
     let project: Option<Project> = match is_init {
         true => {
@@ -95,14 +120,18 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    println!("start");
+    if is_init {
+        return Ok(());
+    }
 
     let file_path = coding_checker(&delivery_dir, &reports_dir, false)?;
 
     if let Some(project) = project {
         println!("Project name: {}", project.name);
         fix_coding_style_issues(&file_path, &delivery_dir, &project);
+        return Ok(());
     }
+
     fix_coding_style_issues(&file_path, &delivery_dir, &Project::default());
 
     Ok(())

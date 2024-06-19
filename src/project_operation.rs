@@ -59,6 +59,7 @@ pub fn project_parse(project_dit: &PathBuf) -> Result<Project> {
 }
 
 const CLANG_FORMAT_FILE: &[u8] = include_bytes!("../resources/.clang-format");
+const MAIN_C_FILE: &[u8] = include_bytes!("../resources/main.c");
 
 pub fn init_new_project(project_dir: &PathBuf) -> Result<Project> {
     let project = Project::from_dir(project_dir)?;
@@ -67,9 +68,19 @@ pub fn init_new_project(project_dir: &PathBuf) -> Result<Project> {
     std::fs::create_dir_all(&delivery_dir)?;
     std::fs::create_dir_all(&reports_dir)?;
 
-    let clang_format_file_path = delivery_dir.join(".clang-format");
+    let clang_format_file_path = project_dir.join(".clang-format");
     std::fs::write(clang_format_file_path, CLANG_FORMAT_FILE)?;
+
+    let main_c_file_path = delivery_dir.join("main.c");
+    std::fs::write(main_c_file_path, MAIN_C_FILE)?;
 
     project.save(project_dir)?;
     Ok(project)
+}
+
+pub fn print_project(project: &Project) {
+    println!("Project name: {}", project.name);
+    println!("Project description: {}", project.description);
+    println!("Delivery directory: {:?}", project.delivery_dir);
+    println!("Reports directory: {:?}", project.reports_dir);
 }
