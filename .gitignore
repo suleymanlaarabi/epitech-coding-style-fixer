@@ -1,3 +1,4 @@
 /reports/
 /.clang-format
 /project.json
+/target/
